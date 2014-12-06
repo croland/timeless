@@ -1,0 +1,30 @@
+timeless notes
+
+
+Notes
+------------
+Each node in the graph is a process
+Each node in the graph knows it's relationships
+An event store is the source of truth
+When an event happens, it's thrown into the store and then brought into the nodes
+A timeless graph can be initialized with a store
+Be able to query through events and graph
+	e.g. Who has a decreasing number of friends with cats over the last month? 
+	e.g. What is the number of left foot socks without a right sock Joe has for each day over the last year? 
+event store is persisted as a log [2]
+
+
+Sources
+------------
+[1] http://dictionary.reference.com/browse/concatenation
+[2] http://en.wikipedia.org/wiki/Transaction_log
+[3] http://www.eecs.harvard.edu/~mdw/proj/seda/
+[4] http://sourceforge.net/projects/seda/
+[5] http://engineering.linkedin.com/distributed-systems/log-what-every-software-engineer-should-know-about-real-time-datas-unifying
+[6] http://en.wikipedia.org/wiki/Sequence_of_events_recorder
+[7] http://en.wikipedia.org/wiki/Data_logger
+[8] http://en.wikipedia.org/wiki/Paxos_(computer_science)
+[9] http://www.datomic.com/
+[10] http://science.howstuffworks.com/warp-speed2.htm
+[11] https://www.youtube.com/watch?v=VYZQxMowBsw
+[12] http://everythingforever.com/einstein.htm

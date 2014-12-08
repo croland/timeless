@@ -1,30 +1,46 @@
-timeless notes
+timeless 
 
 
 Notes
-------------
-Each node in the graph is a process
-Each node in the graph knows it's relationships
-An event store is the source of truth
-When an event happens, it's thrown into the store and then brought into the nodes
-A timeless graph can be initialized with a store
-Be able to query through events and graph
-	e.g. Who has a decreasing number of friends with cats over the last month? 
-	e.g. What is the number of left foot socks without a right sock Joe has for each day over the last year? 
-event store is persisted as a log [2]
+	Each node in the graph is a process
+	Each node in the graph knows it's relationships
+	An event store is the source of truth
+	When an event happens, it's thrown into the store and then brought into the nodes
+	A timeless graph can be initialized with a store
+	Be able to query through events and graph
+		e.g. Who has a decreasing number of friends with cats over the last month? 
+		e.g. What is the number of left foot socks without a right sock Joe has for each day over the last year? 
+	event store is persisted as a log [2]
 
+
+	Journal
+		Need to be able to partition entries by some type of identifier [5 Building a Scalable Log section]
+			Use a leader election style ownership of partitions
+			Leaders can be processes that are scaled when needed
+				This will be a similar approach to how the graph nodes will work
+				This means an aggregation process will need to exist
+			Look at having each leader process manage it's own independent order
+			Look at batching writes
+			disk_log in erlang seems to have the binary log and distributed problem solved
+				
 
 Sources
-------------
-[1] http://dictionary.reference.com/browse/concatenation
-[2] http://en.wikipedia.org/wiki/Transaction_log
-[3] http://www.eecs.harvard.edu/~mdw/proj/seda/
-[4] http://sourceforge.net/projects/seda/
-[5] http://engineering.linkedin.com/distributed-systems/log-what-every-software-engineer-should-know-about-real-time-datas-unifying
-[6] http://en.wikipedia.org/wiki/Sequence_of_events_recorder
-[7] http://en.wikipedia.org/wiki/Data_logger
-[8] http://en.wikipedia.org/wiki/Paxos_(computer_science)
-[9] http://www.datomic.com/
-[10] http://science.howstuffworks.com/warp-speed2.htm
-[11] https://www.youtube.com/watch?v=VYZQxMowBsw
-[12] http://everythingforever.com/einstein.htm
+	[1] http://dictionary.reference.com/browse/concatenation
+	[2] http://en.wikipedia.org/wiki/Transaction_log
+	[3] http://www.eecs.harvard.edu/~mdw/proj/seda/
+	[4] http://sourceforge.net/projects/seda/
+	[5] http://engineering.linkedin.com/distributed-systems/log-what-every-software-engineer-should-know-about-real-time-datas-unifying
+	[6] http://en.wikipedia.org/wiki/Sequence_of_events_recorder
+	[7] http://en.wikipedia.org/wiki/Data_logger
+	[8] http://en.wikipedia.org/wiki/Paxos_(computer_science)
+	[9] http://www.datomic.com/
+	[10] http://science.howstuffworks.com/warp-speed2.htm
+	[11] https://www.youtube.com/watch?v=VYZQxMowBsw
+	[12] http://everythingforever.com/einstein.htm
+	[13] http://en.wikipedia.org/wiki/Atomic_broadcast
+	[14] http://kafka.apache.org/
+	[15] http://erlang.org/doc/man/disk_log.html
+	[16] http://timanovsky.wordpress.com/2009/02/04/correct-implementation-of-fast-server-logging-in-erlang/
+	[17] https://github.com/erlang/otp/blob/master/lib/kernel/test/disk_log_SUITE.erl
+
+

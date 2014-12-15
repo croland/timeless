@@ -42,5 +42,5 @@ Sources
 	[15] http://erlang.org/doc/man/disk_log.html
 	[16] http://timanovsky.wordpress.com/2009/02/04/correct-implementation-of-fast-server-logging-in-erlang/
 	[17] https://github.com/erlang/otp/blob/master/lib/kernel/test/disk_log_SUITE.erl
-
+	[18] https://github.com/croland/gen_leader_revival
 

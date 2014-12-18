@@ -62,3 +62,6 @@ parse_daily_price_event_from_input_and_log_event_test() ->
   Open = Event#tick.open,
   ?assert(Open =:= 27.31),
   disk_log:close(Log).
+
+create_a_datapipeline_and_resolve_event_into_aggregate_from_log() ->
+  ok.

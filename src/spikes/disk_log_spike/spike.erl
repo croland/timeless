@@ -1,25 +1,13 @@
 -module(spike).
--export([get_all/1, open/0]).
 -record(tick, {date, open, high, low, close, vol, adjclose}).
 
 -include_lib("eunit/include/eunit.hrl").
 
-
-run() ->
-	Log = open().
-
-read() ->
-	ok.
-
-read_log(Chunk, Log) ->
-	ok.
-
-open() -> 
-  {ok, Log} = disk_log:open([{name, os:cmd("mktemp")}]),
-  Log.
-
-get_all(Log) ->
-  get_all_terms(Log, start, []).
+run() -> Log = open().
+read() -> ok.
+open() -> {ok, Log} = disk_log:open([{name, os:cmd("mktemp")}]), Log.
+get_all(Log) -> get_all_terms(Log, start, []).
+read_fail(R) -> exit({?MODULE, get(line), R}).
 
 get_all_terms(Log, Cont, Res) ->
   case disk_log:chunk(Log, Cont) of
@@ -28,9 +16,6 @@ get_all_terms(Log, Cont, Res) ->
     eof -> Res
   end.
 
-read_fail(R) ->
-  exit({?MODULE, get(line), R}).
-
 parse_line(Line) ->
   [Date, Open, High, Low, Close, Volume, AdjClose] = re:split(Line, "[,]", [{return, list}]),
   Tick = #tick{date=iolist_to_binary(Date), open=list_to_float(Open), high=list_to_float(High), low=list_to_float(Low), close=list_to_float(Close), vol=list_to_integer(Volume), adjclose=list_to_float(AdjClose)}, 
@@ -38,13 +23,13 @@ parse_line(Line) ->
 
 
 % ----- Tests
-open_test() -> 
+open_a_new_log_test() -> 
   Log = open(),
   [Mode | _] = [M || {mode, M} <- disk_log:info(Log)], 
 	?assert(Mode =:= read_write),
   disk_log:close(Log).
 
-read_test() ->
+read_event_from_log_test() ->
   Log = open(),
   disk_log:log(Log, {some_event, "hello"}),
   Events = get_all(Log),
@@ -65,3 +50,4 @@ parse_daily_price_event_from_input_and_log_event_test() ->
 
 create_a_datapipeline_and_resolve_event_into_aggregate_from_log() ->
   ok.
+

@@ -3,12 +3,10 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
-run() -> Log = open().
-read() -> ok.
 open() -> {ok, Log} = disk_log:open([{name, os:cmd("mktemp")}]), Log.
+
 get_all(Log) -> get_all_terms(Log, start, []).
 read_fail(R) -> exit({?MODULE, get(line), R}).
-
 get_all_terms(Log, Cont, Res) ->
   case disk_log:chunk(Log, Cont) of
     {error, _R} -> read_fail({bad_chunk, Log, Cont});

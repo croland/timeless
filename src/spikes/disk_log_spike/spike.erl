@@ -46,6 +46,13 @@ parse_daily_price_event_from_input_and_log_event_test() ->
   ?assert(Open =:= 27.31),
   disk_log:close(Log).
 
+register_a_datapipeline_router_to_listen_for_events() ->
+  ok.
+
+subscribe_a_datapipeline_process_to_a_router() ->
+  ok.
+
 create_a_datapipeline_and_resolve_event_into_aggregate_from_log() ->
   ok.
+
 

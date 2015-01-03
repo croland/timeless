@@ -1,5 +1,6 @@
 -module(spike).
 -record(tick, {date, open, high, low, close, vol, adjclose}).
+-record(tick_daily, {tick_date, tick_open, tick_high, tick_low, tick_close, tick_vol, tick_adjclose}).
 
 -include_lib("eunit/include/eunit.hrl").
 
@@ -18,6 +19,24 @@ parse_line(Line) ->
   [Date, Open, High, Low, Close, Volume, AdjClose] = re:split(Line, "[,]", [{return, list}]),
   Tick = #tick{date=iolist_to_binary(Date), open=list_to_float(Open), high=list_to_float(High), low=list_to_float(Low), close=list_to_float(Close), vol=list_to_integer(Volume), adjclose=list_to_float(AdjClose)}, 
   Tick.
+
+open_and_parse_file(Filename) ->
+  {ok, Binary} = file:read(Filename),
+  Lines = string:tokens(erlang:binary_to_list(Binary), "\r\n"),
+	lists:map(fun(L) -> parse_line(L) end, Lines).
+
+parse_line(Line) ->
+	[Date, Open, High, Low, Close, Volume, AdjClose] = re:split(Line, "[,]", [{return, list}]),
+	Doc = {[
+		{<<"Date">>, iolist_to_binary(Date)}, 
+		{<<"Open">>, list_to_float(Open)},
+		{<<"High">>, list_to_float(High)},
+		{<<"Low">>, list_to_float(Low)},
+		{<<"Close">>, list_to_float(Close)},
+		{<<"Volume">>, list_to_integer(Volume)},
+		{<<"AdjClose">>, list_to_float(AdjClose)}
+	]},
+	Tick = #tick{tick_date=Date, tick_open=Open, tick_high=High, tick_low=Low, tick_close=Close, tick_vol=Volume, tick_adjclose=AdjClose}.
 
 
 % ----- Tests
@@ -57,5 +76,6 @@ subscribe_a_datapipeline_process_to_a_router() ->
 
 create_a_datapipeline_and_resolve_event_into_aggregate_from_log() ->
   ok.
+
 
 

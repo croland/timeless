@@ -1,11 +1,10 @@
 -module(spike).
 -record(tick, {date, open, high, low, close, vol, adjclose}).
--record(tick_daily, {tick_date, tick_open, tick_high, tick_low, tick_close, tick_vol, tick_adjclose}).
 
 -include_lib("eunit/include/eunit.hrl").
 
+% Log
 open() -> {ok, Log} = disk_log:open([{name, os:cmd("mktemp")}]), Log.
-
 get_all(Log) -> get_all_terms(Log, start, []).
 read_fail(R) -> exit({?MODULE, get(line), R}).
 get_all_terms(Log, Cont, Res) ->
@@ -15,31 +14,53 @@ get_all_terms(Log, Cont, Res) ->
     eof -> Res
   end.
 
+% File processing
 parse_line(Line) ->
-  [Date, Open, High, Low, Close, Volume, AdjClose] = re:split(Line, "[,]", [{return, list}]),
-  Tick = #tick{date=iolist_to_binary(Date), open=list_to_float(Open), high=list_to_float(High), low=list_to_float(Low), close=list_to_float(Close), vol=list_to_integer(Volume), adjclose=list_to_float(AdjClose)}, 
+	[Date, Open, High, Low, Close, Volume, AdjClose] = re:split(Line, "[,]", [{return, list}]),
+  Tick = #tick{
+    date=iolist_to_binary(Date), 
+    open=list_to_float(Open), 
+    high=list_to_float(High), 
+    low=list_to_float(Low), 
+    close=list_to_float(Close), 
+    vol=list_to_integer(Volume), 
+    adjclose=list_to_float(AdjClose)
+  },
   Tick.
 
 open_and_parse_file(Filename) ->
-  {ok, Binary} = file:read(Filename),
+  {ok, Binary} = file:read_file(Filename),
   Lines = string:tokens(erlang:binary_to_list(Binary), "\r\n"),
 	lists:map(fun(L) -> parse_line(L) end, Lines).
 
-parse_line(Line) ->
-	[Date, Open, High, Low, Close, Volume, AdjClose] = re:split(Line, "[,]", [{return, list}]),
-	Doc = {[
-		{<<"Date">>, iolist_to_binary(Date)}, 
-		{<<"Open">>, list_to_float(Open)},
-		{<<"High">>, list_to_float(High)},
-		{<<"Low">>, list_to_float(Low)},
-		{<<"Close">>, list_to_float(Close)},
-		{<<"Volume">>, list_to_integer(Volume)},
-		{<<"AdjClose">>, list_to_float(AdjClose)}
-	]},
-	Tick = #tick{tick_date=Date, tick_open=Open, tick_high=High, tick_low=Low, tick_close=Close, tick_vol=Volume, tick_adjclose=AdjClose}.
+log_tick_events(Log, Ticks) ->
+  lists:foreach(fun(Tick) -> disk_log:log(Log, {tick_event, Tick}) end, Ticks),
+  ok.
 
 
-% ----- Tests
+% Tests
+parse_and_load_daily_prices_into_log_test() ->
+  Log = open(),
+  Ticks = open_and_parse_file("./goog-daily.csv"),
+  log_tick_events(Log, Ticks),
+  Events = get_all(Log), 
+  Event = lists:last(Events), 
+  {EventType, Tick} = Event,
+  ?assert(EventType =:= tick_event),
+  ?assert(Tick#tick.adjclose =:= 558.46),
+  disk_log:close(Log).
+
+open_and_parse_daily_prices_test() ->
+  Ticks = open_and_parse_file("./goog-daily.csv"),
+  Tick = lists:last(Ticks), 
+  ?assert(Tick#tick.adjclose =:= 558.46).
+
+parse_daily_line_test() ->
+  Line = "2015-01-02,529.01,531.27,524.10,524.81,1443600,524.81",
+  Tick = parse_line(Line),
+  ?assert(Tick#tick.open =:= 529.01),
+  ?assert(Tick#tick.adjclose =:= 524.81).
+
 open_a_new_log_test() -> 
   Log = open(),
   [Mode | _] = [M || {mode, M} <- disk_log:info(Log)], 
@@ -65,9 +86,6 @@ parse_daily_price_event_from_input_and_log_event_test() ->
   ?assert(Open =:= 27.31),
   disk_log:close(Log).
 
-parse_and_load_daily_pricing_into_log() ->
-  ok.
-
 register_a_datapipeline_router_to_listen_for_events() ->
   ok.
 
@@ -76,6 +94,4 @@ subscribe_a_datapipeline_process_to_a_router() ->
 
 create_a_datapipeline_and_resolve_event_into_aggregate_from_log() ->
   ok.
-
-
 

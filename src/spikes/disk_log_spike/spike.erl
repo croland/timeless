@@ -14,7 +14,8 @@ get_all_terms(Log, Cont, Res) ->
     eof -> Res
   end.
 
-% File processing
+% File processing for Yahoo historical data file
+% This needs to be moved to ferl
 parse_line(Line) ->
 	[Date, Open, High, Low, Close, Volume, AdjClose] = re:split(Line, "[,]", [{return, list}]),
   Tick = #tick{

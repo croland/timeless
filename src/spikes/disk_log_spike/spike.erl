@@ -46,6 +46,9 @@ parse_daily_price_event_from_input_and_log_event_test() ->
   ?assert(Open =:= 27.31),
   disk_log:close(Log).
 
+parse_and_load_daily_pricing_into_log() ->
+  ok.
+
 register_a_datapipeline_router_to_listen_for_events() ->
   ok.
 

@@ -1,5 +1,6 @@
 -module(spike).
--export([process_event/0]).
+%-export([process_event/0]).
+-compile(export_all).
 
 -include_lib("eunit/include/eunit.hrl").
 
@@ -41,42 +42,57 @@ open_and_parse_file(Filename) ->
 	lists:map(fun(L) -> parse_line_to_tick(L) end, Lines).
 
 log_tick_events(Log, Ticks) -> lists:foreach(fun(Tick) -> disk_log:log(Log, tick_to_event(Tick)) end, Ticks), ok.
+
+% Conversion
 tick_to_event(Tick) -> #event{type=tick_event, body=Tick}.
 ticks_to_events(Ticks) -> lists:map(fun(Tick) -> tick_to_event(Tick) end, Ticks).
 
 % Routing
 % Will need to move this to a router module to manage subscriptions and routing messages
-route_event_to_subscribers(Subscribers, Event) ->
-  [S#subscriber.pid ! Event || S <- Subscribers, Event#event.type =:= S#subscriber.event], 
-  ok.
+route_event_to_subscribers(From, Subscribers, Event) ->
+  [route_event_to_subscriber(From, S#subscriber.pid, Event) || S <- Subscribers, Event#event.type =:= S#subscriber.event].
 
-route_events_to_subscribers(Subscribers, Events) ->
-  lists:foreach(fun(Event) -> route_event_to_subscribers(Subscribers, Event) end, Events), 
-  ok.
+route_events_to_subscribers(From, Subscribers, Events) ->
+  lists:foreach(fun(Event) -> route_event_to_subscribers(From, Subscribers, Event) end, Events).
+
+route_event_to_subscriber(From, Subscriber, Event) ->
+  Subscriber ! {From, Event},
+  receive
+    {reply, Reply} -> Reply;
+    _ -> failed
+  end.
 
 
 % Test
 process_event() ->
   receive
-    {event, Event} ->
-      Event;
-    _ ->
-      ok
+    {From, Event} -> From ! {reply, ok}
   end.
 
 % create a process that an event is routed to
-spawn_test_process() -> spawn(spike, process_event, []).
+spawn_test_process() -> spawn(spike, process_event, []). 
+
+get_subscriber(Pid, Event) ->
+  #subscriber{pid=Pid, event=Event}.
+
+route_event_after_being_parsed_from_file_test() ->
+  Ticks = open_and_parse_file("./goog-daily.csv"),
+  Events = ticks_to_events(Ticks), 
+  Event = lists:last(Ticks),
+  Subscriber = spawn_test_process(),
+  Reply = route_event_to_subscriber(self(), Subscriber, Event),
+  ?assertEqual(ok, Reply).
 
 route_events_after_being_parsed_from_file_test() ->
   Ticks = open_and_parse_file("./goog-daily.csv"),
   Events = ticks_to_events(Ticks), 
+  Event = lists:last(Ticks),
   Subscriber = spawn_test_process(),
-  Subscribers = [#subscriber{pid=Subscriber, event=tick_event}],
-  route_events_to_subscribers(Subscribers, Events),
-  ok.
+  Subscribers = [get_subscriber(Subscriber, tick_event)],
+  Replies = route_event_to_subscribers(self(), Subscribers, Event),
+  [?assertEqual(ok, Replies)].
 
-register_a_router_to_route_events_when_pulled_from_log() ->
-  ok.
+register_a_router_to_route_events_when_pulled_from_log() -> ok.
 
 parse_and_load_daily_prices_into_log_test() ->
   Log = open(),

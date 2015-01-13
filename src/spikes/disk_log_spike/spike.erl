@@ -50,7 +50,8 @@ ticks_to_events(Ticks) -> lists:map(fun(Tick) -> tick_to_event(Tick) end, Ticks)
 % Routing
 % Will need to move this to a router module to manage subscriptions and routing messages
 route_event_to_subscribers(From, Subscribers, Event) ->
-  [route_event_to_subscriber(From, S#subscriber.pid, Event) || S <- Subscribers, Event#event.type =:= S#subscriber.event].
+  Replies = [route_event_to_subscriber(From, S#subscriber.pid, Event) || S <- Subscribers, Event#event.type =:= S#subscriber.event],
+  Replies.
 
 route_events_to_subscribers(From, Subscribers, Events) ->
   lists:foreach(fun(Event) -> route_event_to_subscribers(From, Subscribers, Event) end, Events).

@@ -1,1 +1,16 @@
-[].
+[{<<"eavro">>,
+  {git,"http://github.com/SIfoxDevTeam/eavro.git",
+       {ref,"012e248b262f4897eec17e014f61fbc62d76c9af"}},
+  0},
+ {<<"jsx">>,
+  {git,"https://github.com/talentdeficit/jsx.git",
+       {ref,"d011411c23e9f8c29d98aa1b7a50ddf9709b6a60"}},
+  1},
+ {<<"ranch">>,
+  {git,"https://github.com/extend/ranch.git",
+       {ref,"22e0f96a6ca9288dca338ffec53f15da06abd839"}},
+  1},
+ {<<"zlists">>,
+  {git,"https://github.com/vjache/erlang-zlists.git",
+       {ref,"539c55dd121e542e6efc302b843d80f67f1fdca9"}},
+  1}].
